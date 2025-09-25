@@ -1,5 +1,4 @@
 import typing
-
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -18,6 +17,8 @@ intents.message_content = True
 intents.members = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
+bump_streak = 1
+current_bumper = ""
 
 bot = commands.Bot(command_prefix='/', intents=intents)
 
@@ -26,19 +27,35 @@ bot = commands.Bot(command_prefix='/', intents=intents)
 @bot.event
 async def on_ready():
     print(f"hi i'm {bot.user.name} and i'm ready")
+    log_channel = bot.get_channel(1420791229293265000)
+    await log_channel.send("yo gurt i am up and running")
     try:
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} command(s)")
+        await log_channel.send(f"{len(synced)} commands synced successfully vro")
     except Exception as e:
         print(e)
 
 # Slash commands
 
 @bot.tree.command(name="bump", description="bump the server to achieve nothing but bragging rights for the next 2 hours")
-@app_commands.checks.cooldown(1,7200.0,key=lambda i: (i.guild_id))
+@app_commands.checks.cooldown(1,7200,key=lambda i: (i.guild_id))
 async def bump(interaction: discord.Interaction):
+    global current_bumper
+    global bump_streak
     if interaction.channel.id == 1418641115409813686 or interaction.channel.id == 1309820906100490271:
-        await interaction.response.send_message(f"Thanks for bumping, {interaction.user.mention}! This does nothing for the server, but you win!!! Congrats!!!!! You now get bragging rights for the next 2 hours, which is when I will remind you next.")
+        previous_bumper = current_bumper
+        current_bumper = interaction.user.id
+
+        if current_bumper == previous_bumper:
+            bump_streak += 1
+        else:
+            bump_streak = 1
+
+        if bump_streak > 1:
+            await interaction.response.send_message(f"Thanks for bumping, {interaction.user.mention}! They are currently on a streak of {bump_streak}! This does nothing for the server, but you win!!! Congrats!!!!! You now get bragging rights for the next 2 hours, which is when I will remind you next.")
+        else:
+            await interaction.response.send_message(f"Thanks for bumping, {interaction.user.mention}! This does nothing for the server, but you win!!! Congrats!!!!! You now get bragging rights for the next 2 hours, which is when I will remind you next.")
         await asyncio.sleep(7200)
         await interaction.channel.send(f"<@&1310237621892419594> IT'S THAT TIME TO BUMP AGAIN GUYS YOO")
     else:
@@ -70,7 +87,7 @@ async def on_app_command_error(interaction: discord.Interaction, error: app_comm
         await interaction.response.send_message(f"You are NOT powerful enough, you are missing the {error.missing_permissions} permission(s)", ephemeral=True)
     else: raise error
 
-# Event handler
+# Reference handler
 
 @bot.event
 async def on_message(message):
@@ -85,8 +102,11 @@ async def on_message(message):
         await message.channel.send("Did you just say days? 😱 Like the... 7 Days? 🤔 Chat, is this a 7 Days reference? 😯 Chat! This is a 7 Days reference! 😂 BOI 🫱 you have won the internet today! 😁 Only the guys ever will understand")
         print("days but not 7")
 
+    if "hell yeah" in message.content.lower():
+        await message.channel.send("https://cdn.discordapp.com/attachments/1236429241181143179/1337031531813666826/hellyeah.gif?ex=68d681a6&is=68d53026&hm=5ffd65a3ebd2d4bb68d0eb1c4d32fe7baa10ded1c0bdff56027b0744734cb1eb&")
+
     await bot.process_commands(message)
-'''
+"""
     if "7" in message.content.lower():
         print("7 present!!!!")
         if "days" in message.content.lower():
@@ -95,7 +115,7 @@ async def on_message(message):
         else:
             await message.channel.send("7 DAYS MENTIONED 🗣️🔥 RAAAHH WHAT THE FUCK IS A OMORI COPY⁉️ ⁉️ 🗣️ FUCK TRAUMAS 💪 🙏 ‼️")
             print("me when 7 but no days :pensive:")         
-'''
+"""
     
 
 
