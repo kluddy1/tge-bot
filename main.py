@@ -9,7 +9,6 @@ import asyncio
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
-bump_channel_array = []
 
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.all()
@@ -17,8 +16,11 @@ intents.message_content = True
 intents.members = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
+
+# Variables for various commands
 bump_streak = 1
 current_bumper = ""
+bump_channels = []
 
 bot = commands.Bot(command_prefix='/', intents=intents)
 
@@ -43,7 +45,7 @@ async def on_ready():
 async def bump(interaction: discord.Interaction):
     global current_bumper
     global bump_streak
-    if interaction.channel.id == 1418641115409813686 or interaction.channel.id == 1309820906100490271:
+    if interaction.channel.id in bump_channels:
         previous_bumper = current_bumper
         current_bumper = interaction.user.id
 
@@ -71,7 +73,9 @@ async def send_message_as_bot(interaction: discord.Interaction, arg: typing.Opti
 @bot.tree.command(name="set_bump_channel", description="set this channel to the bump channel automagically (kluddy does it manually)")
 @app_commands.checks.has_permissions(administrator=True)
 async def set_bump_channel(interaction: discord.Interaction):
+    global bump_channels
     await interaction.channel.send(f"this command does NOT yet work correctly, and absolutely NOTHING has been changed\n-# <@776464268966625290> go change their bump channel manually stupid")
+    bump_channels.append(interaction.channel.id)
 
 # TODO: Add bump leaderboard
 
