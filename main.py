@@ -132,12 +132,12 @@ async def send_message_as_bot(interaction: discord.Interaction, who: typing.Opti
 
 # !: ILLEGAL COMMANDS
 
-@bot.tree.command()
-async def ban(ctx, member : discord.Member, *, reason:typing.Optional[str]):
-    if ctx.user.id == 776464268966625290:
-        await member.ban(reason = reason)
-    else:
-        await ctx.response.send_message("You aren't kluddy.", ephemeral=True)
+# @bot.tree.command()
+# async def ban(ctx, member : discord.Member, *, reason:typing.Optional[str]):
+#     if ctx.user.id == 776464268966625290:
+#         await member.ban(reason = reason)
+#     else:
+#         await ctx.response.send_message("You aren't kluddy.", ephemeral=True)
 
 # @bot.tree.command(name="timeout", description="timeout your friends 😐")
 # async def timeout(ctx: commands.Context, member: discord.Member):
