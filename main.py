@@ -157,6 +157,7 @@ async def status():
     last_status_update = time.time()
     await status_channel.send(f"bot running <t:{int(last_status_update)}:R>. If this is over 5 minutes ago, the bot is down.")
     await asyncio.sleep(300)
+    await status()
 
 # Error handler
 
@@ -313,5 +314,6 @@ async def on_message(message):
         await message.channel.send("vilu is awesome")
 
     await bot.process_commands(message)
+
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
