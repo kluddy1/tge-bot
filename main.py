@@ -89,10 +89,12 @@ async def send_message_as_bot(interaction: discord.Interaction, arg: typing.Opti
 
 @bot.tree.command(name="pause_references", description="pause all references (including @ and words) for a specified time")
 @app_commands.checks.has_permissions(administrator=True)
-async def pause_references(interaction: discord.Interaction, duration_seconds: typing.Optional[int]):
+async def pause_references(interaction: discord.Interaction, duration_seconds: int):
     global pause_time
     await interaction.response.send_message(f"references paused for {duration_seconds} seconds, resuming references <t:{int(time.time()) + duration_seconds}:R>", ephemeral=True)
     pause_time = int(time.time()) + duration_seconds
+
+
 
 @bot.tree.command(name="pet", description="pet emoji")
 async def pet(interaction: discord.Interaction):
