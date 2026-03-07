@@ -41,25 +41,8 @@ async def on_ready():
     await log_channel.send("yo gurt i am up and running")
     await status_channel.send("bot should be up and running")
     await status()
-    try:
-        synced = await bot.tree.sync()
-        print(f"Synced {len(synced)} command(s)")
-        await log_channel.send(f"{len(synced)} commands synced successfully vro")
-    except Exception as e:
-        print(e)
 
 # Slash commands
-
-@bot.tree.command(name="manual_sync", description="sync commands")
-async def sync_commands(interaction: discord.Interaction):
-    log_channel = bot.get_channel(1420791229293265000)
-    if interaction.user.id == 776464268966625290:
-        try:
-            synced = await bot.tree.sync()
-            print(f"Synced {len(synced)} command(s)")
-            await log_channel.send(f"{len(synced)} commands synced successfully vro")
-        except Exception as e:
-            print(e)
 
 @bot.tree.command(name="bump", description="bump the server to achieve nothing but bragging rights for the next 2 hours")
 @app_commands.checks.cooldown(1,7200, key=lambda i: (i.channel_id))
@@ -97,18 +80,18 @@ async def send_message_as_bot(interaction: discord.Interaction, arg: typing.Opti
     else:
         await interaction.response.send_message("You aren't kluddy.", ephemeral=True)
 
-@bot.tree.command(name="set_bump_channel", description="set this channel to the bump channel automagically (kluddy does it manually)")
-@app_commands.checks.has_permissions(administrator=True)
-async def set_bump_channel(interaction: discord.Interaction):
-    global bump_channels
-    await interaction.channel.send(f"this command does NOT yet work correctly, and absolutely NOTHING has been changed\n-# <@776464268966625290> go change their bump channel manually stupid")
-    bump_channels.add(interaction.channel.id)
+# @bot.tree.command(name="set_bump_channel", description="set this channel to the bump channel automagically (kluddy does it manually)")
+# @app_commands.checks.has_permissions(administrator=True)
+# async def set_bump_channel(interaction: discord.Interaction):
+#     global bump_channels
+#     await interaction.channel.send(f"this command does NOT yet work correctly, and absolutely NOTHING has been changed\n-# <@776464268966625290> go change their bump channel manually stupid")
+#     bump_channels.add(interaction.channel.id)
 
 @bot.tree.command(name="pause_references", description="pause all references (including @ and words) for a specified time")
 @app_commands.checks.has_permissions(administrator=True)
 async def pause_references(interaction: discord.Interaction, duration_seconds: typing.Optional[int]):
     global pause_time
-    await interaction.channel.send(f"references paused for {duration_seconds} seconds, resuming references <t:{int(time.time()) + duration_seconds}:R>")
+    await interaction.response.send_message(f"references paused for {duration_seconds} seconds, resuming references <t:{int(time.time()) + duration_seconds}:R>", ephemeral=True)
     pause_time = int(time.time()) + duration_seconds
 
 @bot.tree.command(name="pet", description="pet emoji")
@@ -133,19 +116,6 @@ async def send_message_as_bot(interaction: discord.Interaction, who: typing.Opti
             last_executed_jorblecock = time.time()
     else:
         await interaction.response.send_message("don't FUCKING spam please thanks", ephemeral=True)
-
-# @bot.tree.command(name="impregnate", description="🫃")
-# async def impregnate(itx, channel: discord.TextChannel, who: typing.Optional[str]):
-#     global last_executed_impregnation
-#     if time.time() > last_executed_impregnation + 0:
-#         await itx.response.send_message(f"{who}! You just got: impregnated! 🫃 repost to imprgenanté your friends")
-#         message_id = itx.id
-#         msg = await channel.fetch_message(message_id)
-#         msg.add_reaction("🫃")
-#         last_executed_impregnation = time.time()
-#     else:
-#         await itx.response.send_message(
-#             f"it has not been 9 months yet, still pregnant", ephemeral=True)
 
 # !: ILLEGAL COMMANDS
 
@@ -188,12 +158,23 @@ async def on_app_command_error(interaction: discord.Interaction, error: app_comm
         await interaction.response.send_message(f"You are NOT powerful enough, you are missing the {error.missing_permissions} permission(s)", ephemeral=True)
     else: raise error
 
-# reference handler real
+# reference handler + sync command handler
 
 @bot.event
 async def on_message(message):
     global last_executed_mention
     global pause_time
+
+    log_channel = bot.get_channel(1420791229293265000)
+
+    if message.content == "sync please tge" and message.author.id == 776464268966625290:
+        try:
+            synced = await bot.tree.sync()
+            print(f"Synced {len(synced)} command(s)")
+            await log_channel.send(f"{len(synced)} commands synced successfully vro")
+            await message.channel.send("yeah synced succesfully man, no problem!")
+        except Exception as e:
+            print(e)
 
     if message.author == bot.user or time.time() < pause_time:
         return
