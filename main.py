@@ -8,7 +8,6 @@ import os
 import asyncio
 import random
 import time
-import datetime
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -28,6 +27,7 @@ bump_channels = set()
 last_executed_mention = time.time()
 last_executed_jorblecock = time.time()
 last_status_update = time.time()
+pause_time = time.time()
 
 bot = commands.Bot(command_prefix='/', intents=intents)
 
@@ -49,6 +49,17 @@ async def on_ready():
         print(e)
 
 # Slash commands
+
+@bot.tree.command(name="manual_sync", description="sync commands")
+async def sync_commands(interaction: discord.Interaction):
+    log_channel = bot.get_channel(1420791229293265000)
+    if interaction.user.id == 776464268966625290:
+        try:
+            synced = await bot.tree.sync()
+            print(f"Synced {len(synced)} command(s)")
+            await log_channel.send(f"{len(synced)} commands synced successfully vro")
+        except Exception as e:
+            print(e)
 
 @bot.tree.command(name="bump", description="bump the server to achieve nothing but bragging rights for the next 2 hours")
 @app_commands.checks.cooldown(1,7200, key=lambda i: (i.channel_id))
@@ -92,7 +103,13 @@ async def set_bump_channel(interaction: discord.Interaction):
     global bump_channels
     await interaction.channel.send(f"this command does NOT yet work correctly, and absolutely NOTHING has been changed\n-# <@776464268966625290> go change their bump channel manually stupid")
     bump_channels.add(interaction.channel.id)
-    print(bump_channels)
+
+@bot.tree.command(name="pause_references", description="pause all references (including @ and words) for a specified time")
+@app_commands.checks.has_permissions(administrator=True)
+async def pause_references(interaction: discord.Interaction, duration_seconds: typing.Optional[int]):
+    global pause_time
+    await interaction.channel.send(f"references paused for {duration_seconds} seconds, resuming references <t:{int(time.time()) + duration_seconds}:R>")
+    pause_time = int(time.time()) + duration_seconds
 
 @bot.tree.command(name="pet", description="pet emoji")
 async def pet(interaction: discord.Interaction):
@@ -171,29 +188,16 @@ async def on_app_command_error(interaction: discord.Interaction, error: app_comm
         await interaction.response.send_message(f"You are NOT powerful enough, you are missing the {error.missing_permissions} permission(s)", ephemeral=True)
     else: raise error
 
-# Reference handler, deprecated
-
-# @bot.event
-# async def on_message2(message):
-#     print("message detected")
-#     if message.author.id == 744122961509744660:
-#         number = random.randint(1,1000)
-#         if number == 777:
-#             await message.channel.send("DUCKS oooo scary hahaha DUUUCKS DUUUUUUUUCKS BE SCARED DAVER BOY")
-#
-#     elif message.author.id == 776464268966625290:
-#         print("hi 1")
-#         number = random.randint(1, 2)
-#         print(number)
-#         if number == 1:
-#             await message.channel.send("hi father")
-#             print("hi")
-
 # reference handler real
 
 @bot.event
 async def on_message(message):
     global last_executed_mention
+    global pause_time
+
+    if message.author == bot.user or time.time() < pause_time:
+        return
+
     random_line_list = [
         "hi",
         "ok",
@@ -256,9 +260,6 @@ async def on_message(message):
 
     if message.author.id == 83010416610906112 and "hi" in message.content.lower():
         await message.channel.send("shut up nightbot no one likes you")
-
-    if message.author == bot.user:
-        return
 
     if message.author.id == 1012306381233197086:
         if random.randint(0,999) == 696:
