@@ -12,6 +12,8 @@ import asyncio
 import random
 import time
 
+#test change and such
+
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
 
